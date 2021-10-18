@@ -1,17 +1,25 @@
 .container {
   width: 100%;
-  height: 200px;
+  height: 280px;
   display: flex;
   justify-content: center;
   align-items: center;
-  border-radius: 8px;
   cursor: pointer;
-  box-shadow: 0 0 5px 0 colors.$shadow;
-  background-color: #95deff;
+  position: relative;
+  user-select: none;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 
   &:hover {
     transition: 0.1s;
-    border-width: 0;
-    box-shadow: 0 0 15px 0 colors.$shadow;
+    filter: opacity(0.85);
   }
+}
+
+.blocked {
+  pointer-events: none;
 }
