@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
 import { Panel } from "@/components";
-import { shuffle } from '@/utils/array'
+import useCards from "@/hooks/useCards";
 
 export function Game() {
-  const [cards, setCards] = useState([]);
+  const { cards, isLoadingCards, fetchCards } = useCards();
 
   useEffect(() => {
-    fetch("http://localhost:3000/cards")
-      .then((res) => res.json())
-      .then((res) => {
-        setCards(shuffle(res));
-      });
+    fetchCards();
   }, []);
+
+  if (isLoadingCards) {
+    return <p>Cargando...</p>;
+  }
 
   return <Panel cards={cards} />;
 }

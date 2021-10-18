@@ -1,15 +1,29 @@
-import { isOdd } from "@/utils/validators";
 import { useEffect, useState } from "react";
 import { useHistory } from "react-router";
+import { shuffle } from "@/utils/array";
+import { isOdd } from "@/utils/validators";
 
 export default function useCards() {
   const [flippedCards, setFlippedCards] = useState([]);
   const [blockedNames, setBlockedNames] = useState([]);
   const [turn, setTurn] = useState([]);
+  const [cards, setCards] = useState([]);
+  const [isLoadingCards, setIsLoadingCards] = useState(false);
+
   const { push } = useHistory();
 
   const flippedIds = flippedCards.map(({ id }) => id);
   const flippedNames = flippedCards.map(({ name }) => name);
+
+  const preloadCardImage = (image) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = image;
+      img.onload = () => {
+        resolve();
+      };
+    });
+  };
 
   const removeFlippedCard = (card) =>
     setFlippedCards((prevState) =>
@@ -26,7 +40,15 @@ export default function useCards() {
     }
   };
 
-  useEffect(() => {
+  const winGame = () => {
+    if (blockedNames.length === 6) {
+      setTimeout(() => {
+        push("/success");
+      }, 1000);
+    }
+  };
+
+  const handleTurn = () => {
     const nameToBlock = [...new Set(flippedNames)].find(
       (name) =>
         !blockedNames.includes(name) &&
@@ -45,19 +67,36 @@ export default function useCards() {
         });
       }
     }
-  }, [JSON.stringify(flippedCards)]);
+  };
 
-  useEffect(() => {
-    if (blockedNames.length === 6) {
-      setTimeout(() => {
-        push("/success");
-      }, 1000);
-    }
-  }, [blockedNames.length]);
+  const fetchCards = () => {
+    setIsLoadingCards(true);
+    fetch("https://react-flip-cards.s3.sa-east-1.amazonaws.com/cards.json")
+      .then((res) => res.json())
+      .then((res) => {
+        let preloadedImages = [];
+        for (const { image } of res) {
+          preloadedImages.push(preloadCardImage(image));
+        }
+        Promise.all(preloadedImages)
+          .then(() => {
+            setCards(shuffle(res));
+          })
+          .finally(() => {
+            setIsLoadingCards(false);
+          });
+      });
+  };
 
   return {
     blockedNames,
     flippedIds,
-    handleClickCard
+    handleClickCard,
+    handleTurn,
+    flippedCards,
+    winGame,
+    fetchCards,
+    cards,
+    isLoadingCards,
   };
 }
