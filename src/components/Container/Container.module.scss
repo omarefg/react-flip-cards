@@ -1,0 +1,11 @@
+.container {
+  max-width: 900px;
+  width: 90%;
+  margin: 0 auto;
+  padding: 2rem 0;
+  min-height: calc(100vh - 4rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
